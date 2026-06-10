@@ -1,0 +1,53 @@
+Packet Sniffer
+==============
+
+Descrição
+---------
+
+Projeto educativo em Python para captura e inspeção de pacotes de rede. Foi desenvolvido como exemplo didático e contém um módulo `vulnerable_sniffer` que demonstra práticas inseguras — use apenas em redes e ambientes de teste onde você tem permissão.
+
+Aviso de uso
+-----------
+
+Este software é apenas para fins educativos e de pesquisa. Não o execute em redes alheias ou sem autorização explícita. O autor não se responsabiliza por uso indevido.
+
+Requisitos
+---------
+
+- Python 3.8 ou superior
+- Dependências listadas em `requirements.txt`
+
+Instalação
+---------
+
+1. Clone o repositório:
+
+	git clone <url-do-repo>
+	cd packet-sniffer
+
+2. Crie e ative um ambiente virtual (recomendado):
+
+	python -m venv venv
+	source venv/bin/activate
+
+3. Instale as dependências:
+
+	pip install -r requirements.txt
+
+Estrutura do projeto
+--------------------
+
+- [src/](src/) — código fonte principal
+  - [src/__main__.py](src/__main__.py)
+  - [src/models/ui.py](src/models/ui.py)
+  - [src/models/vulnerable_sniffer.py](src/models/vulnerable_sniffer.py)
+- [requirements.txt](requirements.txt)
+
+Como executar
+-------------
+
+Execute o pacote como módulo:
+
+	python -m src
+
+Siga as instruções interativas fornecidas pela interface.
