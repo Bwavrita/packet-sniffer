@@ -2,16 +2,19 @@ import threading
 from src.models.vulnerable_sniffer import VulnerableSniffer
 from src.models.ui import VulnerabilityDashboard
 
-DEBUG = False
-PATH = ['src/pcaps/http.pcap', 'src/pcaps/ftp.pcap'] 
+DEBUG = True
+PATH = "src/pcap_files/PORT_SCAN_ALL_PORTS.pcapng" 
+PATH_4000 = "src/pcap_files/PORT_SCAN_4000_PORTS.pcapng" 
 
 def main():
-    sniffer = VulnerableSniffer(path_files=PATH, interface='wg0')
     
     if DEBUG:
+        sniffer = VulnerableSniffer(path_file=PATH_4000 ,port_threshold=3000 ,interface='wlp0s20f3') # To test with a smaller pcap file, you can use PATH_4000 and port_threshold=4000
         print("Debug mode enabled: Processing pcap files")
-        sniffer.run_debug()
+        sniffer_thread = threading.Thread(target=sniffer.run_debug, daemon=True)
+        sniffer_thread.start()
     else:
+        sniffer = VulnerableSniffer(path_file=PATH ,interface='wlp0s20f3')  # Replace with your network interface name
         print("Live capture mode enabled: Starting packet sniffer")
         sniffer_thread = threading.Thread(target=sniffer.run, daemon=True)
         sniffer_thread.start()

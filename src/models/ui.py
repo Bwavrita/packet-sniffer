@@ -64,12 +64,17 @@ class VulnerabilityDashboard:
                 elif protocol == 'ftp':
                     details.append(html.H5("Pacotes FTP Vulneráveis"))
                     details.append(html.Ul([html.Li(f"ID {packet['id']}: {packet['command']} {packet['arg']}") for packet in self.ftp_packets]))
+                
                 elif protocol == 'port_scan_window_time':
                     details.append(html.H5("Alertas de Port Scan (Janela de Tempo) Identificados"))
-                    details.append(html.Ul([html.Li(f"Ataque: {scan['tipo']} | Origem: {scan['origem']} | Porta Alvo: {scan['porta']}") for scan in self.port_scan_packets_window_time]))
+                    # Corrigido para bater com as chaves: 'Type', 'Origin', 'Ports'
+                    details.append(html.Ul([html.Li(f"Ataque: {scan['Type']} | Origem: {scan['Origin']} | Portas: {scan['Ports']}") for scan in self.port_scan_packets_window_time]))
+                
                 elif protocol == 'port_scan_stateful':
                     details.append(html.H5("Alertas de Port Scan (Estados) Identificados"))
-                    details.append(html.Ul([html.Li(f"Ataque: {scan['tipo']} | Origem: {scan['origem']} | Porta Alvo: {scan['porta']}") for scan in self.port_scan_packets_stateful]))
+                    # Corrigido para bater com as chaves: 'Type', 'origin', 'ports'
+                    # Nota: Como 'ports' é um set(), usamos o list() ou join() para exibir de forma legível
+                    details.append(html.Ul([html.Li(f"Ataque: {scan['Type']} | Origem: {scan['origin']} | Portas Alvo: {list(scan['ports'])}") for scan in self.port_scan_packets_stateful]))
             else:
                 details.append(html.P("Clique em uma barra do gráfico para listar os detalhes dos pacotes."))
 

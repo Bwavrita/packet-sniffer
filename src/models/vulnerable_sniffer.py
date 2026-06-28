@@ -6,8 +6,8 @@ from collections import defaultdict, deque
 import time
 
 class VulnerableSniffer:
-    def __init__(self, path_files: list=[], time_window: int=60, port_threshold: int=4000, interface: str='wlp0s20f3'):
-        self.path_files = path_files
+    def __init__(self, path_file: str='', time_window: int=60, port_threshold: int=4000, interface: str='wlp0s20f3'):
+        self.path_file = path_file
         self.vulnerabilities = {
             'http': 0,
             'ftp': 0,
@@ -34,12 +34,11 @@ class VulnerableSniffer:
             self.process_packet(packet)
 
     def run_debug(self):
-        print(f'[DEBUG] Starting debug capture for {len(self.path_files)} file(s)')
-        for file_path in self.path_files:
-            print(f'[DEBUG] Reading capture file: {file_path}')
-            capture = pyshark.FileCapture(file_path)
-            for packet in capture:
-                self.process_packet(packet)
+        print(f'[DEBUG] Starting debug capture')
+        print(f'[DEBUG] Reading capture file: {self.path_file}')
+        capture = pyshark.FileCapture(self.path_file)
+        for packet in capture:
+            self.process_packet(packet)
 
     def process_packet(self, packet):
         try:
