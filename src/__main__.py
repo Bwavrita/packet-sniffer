@@ -6,7 +6,7 @@ DEBUG = False
 PATH = ['src/pcaps/http.pcap', 'src/pcaps/ftp.pcap'] 
 
 def main():
-    sniffer = VulnerableSniffer(path_files=PATH)
+    sniffer = VulnerableSniffer(path_files=PATH, interface='wg0')
     
     if DEBUG:
         print("Debug mode enabled: Processing pcap files")
