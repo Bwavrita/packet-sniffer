@@ -1,24 +1,28 @@
-# Packet Sniffer
+# Packet Sniffer — Detector de Vulnerabilidades e Port Scanning
 
-Ferramenta educativa em Python para captura e análise de pacotes de rede com detecção de vulnerabilidades e ataques comuns. Desenvolvida como projeto acadêmico.
+Ferramenta educativa em Python para captura e análise de pacotes de rede com detecção de protocolos inseguros e técnicas de port scanning. Desenvolvida como projeto acadêmico na Universidade de Caxias do Sul (UCS), baseada no projeto open source [VulnerablePackages](https://github.com/MaridianeLugaresi/VulnerablePackages).
 
-**Aviso:** Este software destina-se exclusivamente a fins educativos e de pesquisa. Execute apenas em redes e ambientes de teste nos quais você possui autorização explícita. Os autores não se responsabilizam por uso indevido.
+> **Aviso:** Este software destina-se exclusivamente a fins educativos e de pesquisa. Execute apenas em redes e ambientes de teste nos quais você possui autorização explícita. Os autores não se responsabilizam por uso indevido.
 
 ---
 
 ## Funcionalidades
 
-- **Captura ao vivo** de pacotes em interface de rede ou **modo debug** via arquivos `.pcap`
-- **Detecção de protocolos inseguros:**
-  - HTTP — identifica payloads com campos sensíveis (usuário, senha, *password*)
-  - FTP — detecta endereços de e-mail expostos em argumentos de comandos
-- **Detecção de port scanning:**
-  - *Time Window Scan* — volume de portas únicas por origem dentro de uma janela de tempo
-  - *Half-Open Scan (SYN sem ACK)* — conexões TCP incompletas
-  - *NULL Scan* — pacotes TCP sem flags
-  - *FIN Scan* — pacotes com FIN sem ACK
-  - *XMAS Scan* — pacotes com FIN + PSH + URG
-- **Dashboard web interativo** (Dash + Plotly) com atualização automática a cada 2 segundos e detalhamento por clique no gráfico
+### Detecção de protocolos inseguros (L7)
+- **HTTP** — identifica payloads com campos sensíveis (usuário, senha, *password*)
+- **FTP** — detecta endereços de e-mail expostos em argumentos de comandos
+
+### Detecção de port scanning (L3/L4) — nova funcionalidade
+- **Time Window Scan** — detecta varredura volumétrica: mais de N portas únicas por IP de origem em uma janela deslizante de 60 segundos (threshold configurável)
+- **Half-Open Scan (SYN sem ACK)** — rastreia conexões TCP iniciadas (SYN) que não completam o handshake em até 5 segundos
+- **NULL Scan** — pacotes TCP com campo de flags igual a `0x00` (nenhuma flag ativa)
+- **FIN Scan** — pacotes com flag FIN ativa e ACK inativa (`flags & 0x11 == 0x01`)
+- **XMAS Scan** — pacotes com FIN + PSH + URG simultaneamente ativados (`flags & 0x29 == 0x29`)
+
+### Dashboard
+- Interface web interativa (Dash + Plotly) com atualização automática a cada 2 segundos
+- Gráfico de barras por categoria de ataque/vulnerabilidade
+- Listagem detalhada de alertas ao clicar em cada barra (IP de origem, tipo de ataque, portas visadas)
 
 ---
 
@@ -50,30 +54,43 @@ pip install -r requirements.txt
 
 ## Uso
 
-### Modo ao vivo
+### Modo debug (recomendado para teste)
 
-Captura pacotes em tempo real na interface configurada em `src/__main__.py` (padrão: `wlp0s20f3`).
-
-```bash
-sudo python -m src
-```
-
-> Altere o valor de `interface` no construtor de `VulnerableSniffer` para corresponder à sua interface de rede (ex.: `eth0`, `enp3s0`).
-
-### Modo debug
-
-Processa arquivos `.pcap` locais sem necessidade de permissões de root. Edite `src/__main__.py`:
-
-```python
-DEBUG = True
-PATH = ['src/pcaps/http.pcap', 'src/pcaps/ftp.pcap']
-```
+Processa os arquivos `.pcapng` incluídos no repositório sem precisar de permissões de root.
 
 ```bash
 python -m src
 ```
 
-Após iniciar, acesse o dashboard em **http://localhost:8050**.
+Por padrão, `DEBUG = False` em `src/__main__.py` e o arquivo de captura configurado é `PORT_SCAN_4000_PORTS.pcapng`, com threshold de 3000 portas.
+
+Para testar o arquivo completo de port scan:
+
+```python
+# Em src/__main__.py:
+sniffer = VulnerableSniffer(path_file=PATH, port_threshold=4000, interface='wlp0s20f3')
+sniffer_thread = threading.Thread(target=sniffer.run_debug, daemon=True)
+```
+
+### Modo ao vivo
+
+Captura pacotes em tempo real. Edite `src/__main__.py`:
+
+```python
+DEBUG = False
+```
+
+Altere também o nome da interface de rede (padrão: `wlp0s20f3`):
+
+```python
+sniffer = VulnerableSniffer(path_file=PATH, interface='eth0')
+```
+
+```bash
+sudo python -m src
+```
+
+Acesse o dashboard em **http://localhost:8050** após iniciar.
 
 ---
 
@@ -84,10 +101,13 @@ packet-sniffer/
 ├── src/
 │   ├── __init__.py
 │   ├── __main__.py               # Ponto de entrada; alterna entre modo ao vivo e debug
-│   └── models/
-│       ├── __init__.py
-│       ├── vulnerable_sniffer.py # Captura e lógica de detecção
-│       └── ui.py                 # Dashboard Dash/Plotly
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── vulnerable_sniffer.py # Captura, detecção L7 (HTTP/FTP) e L3/L4 (port scan)
+│   │   └── ui.py                 # Dashboard Dash/Plotly
+│   └── pcap_files/
+│       ├── PORT_SCAN_4000_PORTS.pcapng   # Captura de varredura ~4000 portas (teste rápido)
+│       └── PORT_SCAN_ALL_PORTS.pcapng    # Captura de varredura completa de portas
 ├── requirements.txt
 └── README.md
 ```
@@ -102,3 +122,9 @@ packet-sniffer/
 | dash | 4.1.0 | Framework do dashboard web |
 | dash-bootstrap-components | 2.0.4 | Estilização Bootstrap para o Dash |
 | plotly | 6.7.0 | Gráficos interativos |
+
+---
+
+## Licença
+
+Este projeto é um fork de [VulnerablePackages](https://github.com/MaridianeLugaresi/VulnerablePackages).
