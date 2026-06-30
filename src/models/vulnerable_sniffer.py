@@ -2,6 +2,7 @@ import pyshark
 import re
 
 from pyshark import capture
+import asyncio
 from collections import defaultdict, deque
 import time
 
@@ -28,6 +29,10 @@ class VulnerableSniffer:
 
     def run(self):
         print(f'[DEBUG] Starting live capture on interface {self.interface}')
+
+        loop = asyncio.get_event_loop()
+        asyncio.set_event_loop(loop)
+
         capture_live = pyshark.LiveCapture(interface=self.interface)
         
         for packet in capture_live.sniff_continuously():
@@ -36,6 +41,10 @@ class VulnerableSniffer:
     def run_debug(self):
         print(f'[DEBUG] Starting debug capture')
         print(f'[DEBUG] Reading capture file: {self.path_file}')
+
+        loop = asyncio.get_event_loop()
+        asyncio.set_event_loop(loop)
+
         capture = pyshark.FileCapture(self.path_file)
         for packet in capture:
             self.process_packet(packet)

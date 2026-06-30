@@ -43,8 +43,9 @@ cd packet-sniffer
 
 # 2. Crie e ative um ambiente virtual (recomendado)
 python -m venv venv
-source venv/bin/activate        # Linux/macOS
-# venv\Scripts\activate         # Windows
+source .venv/bin/activate        # Linux/macOS
+.venv\Scripts\activate          # Windows
+.venv\Scripts\activate.bat      # Windows (cmd)
 
 # 3. Instale as dependências
 pip install -r requirements.txt
