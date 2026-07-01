@@ -4,6 +4,9 @@ import re
 from pyshark import capture
 import asyncio
 from collections import defaultdict, deque
+from pathlib import Path
+import shutil
+import tempfile
 import time
 
 class VulnerableSniffer:
@@ -27,11 +30,15 @@ class VulnerableSniffer:
         self.active_window_scans = {}
         self.interface = interface
 
+    def _prepare_event_loop(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
     def run(self):
         print(f'[DEBUG] Starting live capture on interface {self.interface}')
 
-        loop = asyncio.get_event_loop()
-        asyncio.set_event_loop(loop)
+        self._prepare_event_loop()
 
         capture_live = pyshark.LiveCapture(interface=self.interface)
         
@@ -42,12 +49,26 @@ class VulnerableSniffer:
         print(f'[DEBUG] Starting debug capture')
         print(f'[DEBUG] Reading capture file: {self.path_file}')
 
-        loop = asyncio.get_event_loop()
-        asyncio.set_event_loop(loop)
+        self._prepare_event_loop()
 
-        capture = pyshark.FileCapture(self.path_file)
-        for packet in capture:
-            self.process_packet(packet)
+        temp_file = None
+
+        try:
+            try:
+                capture = pyshark.FileCapture(self.path_file)
+            except pyshark.capture.capture.TSharkCrashException:
+                source_path = Path(self.path_file).resolve()
+                with tempfile.NamedTemporaryFile(suffix=source_path.suffix, delete=False) as temp_handle:
+                    temp_file = Path(temp_handle.name)
+
+                shutil.copy2(source_path, temp_file)
+                capture = pyshark.FileCapture(str(temp_file))
+
+            for packet in capture:
+                self.process_packet(packet)
+        finally:
+            if temp_file and temp_file.exists():
+                temp_file.unlink()
 
     def process_packet(self, packet):
         try:

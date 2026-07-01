@@ -30,7 +30,6 @@ Ferramenta educativa em Python para captura e análise de pacotes de rede com de
 
 - Python 3.8 ou superior
 - [TShark](https://www.wireshark.org/docs/man-pages/tshark.html) instalado e acessível no PATH (dependência do pyshark)
-- Permissões de administrador para captura ao vivo (`sudo`)
 
 ---
 
@@ -42,13 +41,15 @@ git clone https://github.com/Bwavrita/packet-sniffer.git
 cd packet-sniffer
 
 # 2. Crie e ative um ambiente virtual (recomendado)
-python -m venv venv
+python -m venv .venv
 source .venv/bin/activate        # Linux/macOS
 .venv\Scripts\activate          # Windows
 .venv\Scripts\activate.bat      # Windows (cmd)
 
 # 3. Instale as dependências
 pip install -r requirements.txt
+
+sudo apt install tshark
 ```
 
 ---

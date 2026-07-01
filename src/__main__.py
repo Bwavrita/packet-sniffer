@@ -2,7 +2,7 @@ import threading
 from src.models.vulnerable_sniffer import VulnerableSniffer
 from src.models.ui import VulnerabilityDashboard
 
-DEBUG = False  # Set to True to enable debug mode and process pcap files instead of live capture
+DEBUG = True  # Set to True to enable debug mode and process pcap files instead of live capture
 PATH = "src/pcap_files/PORT_SCAN_ALL_PORTS.pcapng" 
 PATH_4000 = "src/pcap_files/PORT_SCAN_4000_PORTS.pcapng" 
 
